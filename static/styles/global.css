@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+*{
+  font-family: 'Ariel', cursive;
+  margin: 0px;
+}
+a{
+  text-decoration: none;
+  color: black;
+}
+.box{
+  padding: 3%;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  margin-bottom: 10px;
+}
+
+.navigation{
+  padding: 1%;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+.navigation-side{
+  display: flex;
+  justify-content: space-between;
+}
+.navigation-item{
+  text-decoration: none;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  padding: 10px;
+  color: black;
+  margin-right: 5px;
+}
+
+.main{
+  margin: 1%;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.form-error{
+  color: red;
+  text-align: center;
+}

@@ -1,0 +1,16 @@
+.form{
+  margin-left: 5%;
+  margin-right: 5%;
+  margin-bottom: 2%;
+  display: flex;
+  flex-direction: column;
+}
+.form-field{
+  height: 30px;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+.form-submit{
+  height: 40px;
+  font-size: 18px;
+}

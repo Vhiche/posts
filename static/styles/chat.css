@@ -1,0 +1,30 @@
+.message{
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-bottom: 9px;
+    padding: 5px;
+}
+.left{
+    text-align: start;
+}
+.right{
+    text-align: end;
+}
+.message-header{
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+#messages-holder{
+    display: block;
+    max-height: 60vh;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+#form-message{
+  display: flex;
+  justify-content: stretch;
+}
+#form-message textarea{
+  width: 95%;
+  margin-right: 8px;
+}
