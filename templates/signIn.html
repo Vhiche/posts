@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authorisation</title>
+  <link rel="stylesheet" href="{{url_for('static',filename='styles/auth.css') }}">
+  <link rel="stylesheet" href="{{url_for('static',filename='styles/global.css') }}">
+</head>
+<body>
+  <div class="main">
+      <div class="navigation ">
+          <div class="navigation-side">
+            
+          </div>
+          <div class="navigation-side">
+              <div class="navigation-item">
+                  <a href="{{url_for('sign_up')}}">Register</a>
+              </div>
+          </div>
+      </div>
+    <br>
+    <center><h3>Authorisation</h3></center>
+      <br>
+        <div class="box">
+            <form class="form" method="POST">
+                <input class="form-field" name="email" type="email" placeholder="Email">
+                <input class="form-field" name="password" type="password" placeholder="Password">
+                <button class="form-submit" type="submit">Log in</button>
+            
+                <p class="form-error">{{error}}</p>
+            </form>
+        </div>
+
+  </div>
+
+</body>
+</html>

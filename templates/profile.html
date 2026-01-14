@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='styles/global.css') }}">
+</head>
+<body>
+  <div class="main">
+      <div class="navigation ">
+          <div class="navigation-side">
+              {% if session["id"] %}
+              <div class="navigation-item">
+                  <a href="{{url_for('feed')}}">Idk later</a>
+              </div>
+              <div class="navigation-item">
+                  <a href="{{url_for('chat_list')}}">Chats</a>
+              </div>
+              {% endif %}
+          </div>
+          <div class="navigation-side">
+              {% if session["id"] %}
+              <div class="navigation-item">
+                   <a href="{{url_for('profile', client_id = session['id'])}}">Profile</a>
+              </div>
+              {% else %}
+              <div class="navigation-item">
+                  <a href="{{url_for('sign_in')}}">Log in</a>
+              </div>
+              {% endif %}
+              {% if session["id"] %}
+              <div class="navigation-item">
+                  <a href="{{url_for('log_out')}}">Log out</a>
+              </div>
+              {% endif %}
+          </div>
+      </div>
+
+        <div class="box">
+            <h3>Profile</h3>
+            <p>ID: {{client_id}}</p>
+            <p>Email: {{client_email}}</p>
+            <p>About me: {{client_about}}</p>
+            {% if client_id != session['id'] %}
+                <div class="box">
+                    <a href="{{ url_for('chat_find', client_id=client_id) }}">Send message</a>
+                </div>
+            {% endif %}
+        </div>
+  </div>
+
+</body>
+</html>

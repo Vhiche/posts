@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>News</title>
+  <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet" type="text/css" />
+  <link href="{{ url_for('static', filename='styles/feed.css') }}" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div class="main">
+      <div class="navigation ">
+          <div class="navigation-side">
+                 <div class="navigation-item">
+                  <a href="{{url_for('feed')}}">News</a>
+              </div>
+          </div>
+          <div class="navigation-side">
+              {% if session["id"] %}
+              <div class="navigation-item">
+                  <a href="{{url_for('chat_list')}}">Chats</a>
+              </div>
+              {% endif %}
+          </div>
+          <div class="navigation-side">
+              {% if session["id"] %}
+              <div class="navigation-item">
+                   <a href="{{url_for('profile', client_id = session['id'])}}">Profile</a>
+              </div>
+              {% else %}
+              <div class="navigation-item">
+                  <a href="{{url_for('sign_in')}}">Log in</a>
+              </div>
+              {% endif %}
+              {% if session["id"] %}
+              <div class="navigation-item">
+                  <a href="{{url_for('log_out')}}">Log out</a>
+              </div>
+              {% endif %}
+          </div>
+      </div>
+
+        <br>
+        <center><h3>Posts</h3></center>
+      <br>
+        <div class="box">
+            <center><b>Add post</b></center>
+              <form id="form-post" method="POST" enctype='multipart/form-data'>
+                  <textarea name="text" placeholder="Message"></textarea>
+                  <div>
+                    <input type="file" name="file" placeholder="Filename">
+                      <input type="submit">
+                      
+                  </div>
+              </form>
+        </div>
+        <div id="posts" >
+            {% for post in posts %}
+              <div class="post box">
+                <div class="post-header">
+                  <div class="post-author">
+                    <a href="{{url_for('profile', client_id=post.client_id)}}">
+                     {{ post.client_email }}
+                    </a>
+                  </div>
+                  <div class="post-date">
+                    {{ post.datetime }}
+                  </div>
+                </div>
+                <div class="post-body">
+                  <div class="post-text">
+                    {{ post.text }}
+                  </div>
+                  <div class="post-img">
+                      <img src='{{url_for("get_file",filename=post.filename)}}' alt=''>
+                  </div>
+                </div>
+                {% if post.client_id == session['id'] %}
+                <div class="post-footer">
+                    <form action="{{ url_for('post_delete', post_id=post.id) }}" method="post">
+                        <input type="submit" value="Delete">
+                    </form>
+                </div>
+                {% endif%}
+              </div>
+            {% endfor %}
+        </div>
+  </div>
+ 
+  
+  <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+</body>
+
+</html>
