@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS client (
     id INTEGER PRIMARY KEY,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    about TEXT NOT NULL
+    about TEXT NOT NULL,
+    username TEXT NOT NULL
 )
 """)
     query = """SELECT * FROM client"""
@@ -25,7 +26,8 @@ CREATE TABLE IF NOT EXISTS client (
     id INTEGER PRIMARY KEY,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    about TEXT NOT NULL
+    about TEXT NOT NULL,
+    username TEXT NOT NULL
 )
 """)
     query = """SELECT * FROM client WHERE id = (?)"""
@@ -43,7 +45,8 @@ CREATE TABLE IF NOT EXISTS client (
     id INTEGER PRIMARY KEY,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    about TEXT NOT NULL
+    about TEXT NOT NULL,
+    username TEXT NOT NULL
 )
 """)
     query = """SELECT * FROM client WHERE email = (?)"""
@@ -54,18 +57,38 @@ CREATE TABLE IF NOT EXISTS client (
     return res
 
 
-def createUser(email, password):
+def getUserByUsername(username):
     connection = get_connection()
     connection.execute("""
 CREATE TABLE IF NOT EXISTS client (
     id INTEGER PRIMARY KEY,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    about TEXT NOT NULL
+    about TEXT NOT NULL,
+    username TEXT NOT NULL
 )
 """)
-    query = """INSERT INTO client (email, password, about) VALUES (?, ?, ?)"""
-    args = (email, password, "")
+    query = """SELECT * FROM client WHERE username = (?)"""
+    args = (username,)
+    cur = connection.execute(query, args)
+    res = cur.fetchone()
+    cur.close()
+    return res
+
+
+def createUser(email, password, username):
+    connection = get_connection()
+    connection.execute("""
+CREATE TABLE IF NOT EXISTS client (
+    id INTEGER PRIMARY KEY,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL,
+    about TEXT NOT NULL,
+    username TEXT NOT NULL
+)
+""")
+    query = """INSERT INTO client (email, password, about, username) VALUES (?, ?, ?)"""
+    args = (email, password, "", username)
     cur = connection.execute(query, args)
     connection.commit()
     cur.close()
