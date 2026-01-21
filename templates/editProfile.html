@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <link rel="stylesheet" href="{{url_for('static',filename='styles/global.css') }}">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="stylesheet" href="{{url_for('static',filename='styles/auth.css') }}">
+  <link rel="stylesheet" href="{{url_for('static',filename='styles/global.css') }}">
 </head>
 <body>
-  <div class="main">
-      <div class="navigation ">
+  <div class="navigation ">
           <div class="navigation-side">
               {% if session["id"] %}
               <div class="navigation-item">
@@ -38,22 +38,21 @@
           </div>
       </div>
 
+    <br>
+    <center><h3>Edit</h3></center>
+      <br>
+
         <div class="box">
-            <h3>{{client_username}}</h3>
-            <p>ID: {{client_id}}</p>
-            <p>Email: {{client_email}}</p>
-            <p>About me: {{client_about}}</p>
-            {% if client_id != session['id'] %}
-                <div class="box">
-                    <a href="{{ url_for('chat_find', client_id=client_id) }}">Send message</a>
-                </div>
-            {% else %}
-                <div class="box">
-                    <a href="{{ url_for('edit_profile', client_id=client_id) }}">Edit profile</a>
-                </div>
-            {% endif %}
+            <form class="form" method="POST">
+                <input class="form-field" name="email" type="email" placeholder="Email" value={{client_email}}>
+                <input class="form-field" name="username" type="text" placeholder="Username" value={{client_username}}>
+                <input class="form-field" name="about" type="text" placeholder="About" value={{client_about}}>
+                <button class="form-submit" type="submit">Submit</button>
+                <p class="form-error">{{error}}</p>
+            </form>
         </div>
   </div>
 
+  
 </body>
 </html>

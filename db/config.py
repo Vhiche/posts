@@ -1,7 +1,9 @@
 import sqlite3
+import os
 
-DATABASE = 'db/sqlite.db'
-
+ROOT = os.path.dirname(os.path.abspath(__file__))
+DB = '\\sqlite.db'
+DATABASE = ROOT + DB
 
 def get_connection():
     connection = sqlite3.connect(DATABASE)

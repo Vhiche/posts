@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, send_from_directory, session,
 from pyngrok import ngrok
 from functools import wraps
 from db.posts import createPost, getAllPosts, getPostById, deletePostById
-from db.clients import getUserById, getUserByEmail, createUser, getUserByUsername
+from db.clients import getUserById, getUserByEmail, createUser, getUserByUsername, editUser
 from db.chats import getChatById, getChatsWithClientById, createChat, getChatBetweenClients
 from db.messages import getMessagesByChatId, createMessage
 import datetime
@@ -92,7 +92,7 @@ def chat_find(client_id):
 def chat(chat_id):
     if request.method == "POST":
         text = request.form["text"]
-        date_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
+        date_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M")
         createMessage(text, date_time, int(chat_id), session["id"])
     messages = getMessagesByChatId(int(chat_id))
     for i in range(len(messages)):
@@ -161,13 +161,43 @@ def log_out():
 def profile(client_id):
     client_id = int(client_id)
     client = getUserById(client_id)
+    client_username = client["username"]
     client_email = client["email"]
     client_about = client["about"]
-    return render_template("profile.html", client_id=client_id, client_email=client_email, client_about=client_about)
+    return render_template("profile.html", client_id=client_id, client_username=client_username,
+                           client_email=client_email, client_about=client_about)
 
 
-if __name__ == "main":
-    ngrok.set_auth_token("37vEMXYcl0YQCjTmbePQHAJivz3_3VveMBS8a9PDpMZbwsPxA")
-    public_url = ngrok.connect(67)
-    print(f" * ngrok tunnel available at: {public_url}")
+@app.route('/profile/edit', methods=["GET", "POST"])
+@login_required
+def edit_profile():
+    client = getUserById(session["id"])
+    client_username = client["username"]
+    client_email = client["email"]
+    client_about = client["about"]
+    if request.method == "POST":
+        email = request.form["email"]
+        username = request.form["username"]
+        about = request.form["about"]
+        user_from_db_email = getUserByEmail(email)
+        if not user_from_db_email or email == client_email:
+            user_from_db_name = getUserByUsername(email)
+            if not user_from_db_name or username == client_username:
+                editUser(session["id"], email, username, about)
+                return redirect(url_for('profile', client_id=session["id"]))
+            else:
+                return render_template("editProfile.html", error="There's user with this username", client_username=client_username,
+                           client_email=client_email, client_about=client_about)
+        else:
+            return render_template("editProfile.html", error="There's user with this email", client_username=client_username,
+                           client_email=client_email, client_about=client_about)
+    elif request.method == "GET":
+        return render_template("editProfile.html", client_username=client_username,
+                           client_email=client_email, client_about=client_about)
+
+
+if __name__ == "__main__":
+    # ngrok.set_auth_token("37vEMXYcl0YQCjTmbePQHAJivz3_3VveMBS8a9PDpMZbwsPxA")
+    # public_url = ngrok.connect("67")
+    # print(f" * ngrok tunnel available at: {public_url}")
     app.run(host='0.0.0.0', port=67)
