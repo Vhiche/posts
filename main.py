@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, send_from_directory, session,
 from pyngrok import ngrok
 from functools import wraps
 from db.posts import createPost, getAllPosts, getPostById, deletePostById
-from db.clients import getUserById, getUserByEmail, createUser
+from db.clients import getUserById, getUserByEmail, createUser, getUserByUsername
 from db.chats import getChatById, getChatsWithClientById, createChat, getChatBetweenClients
 from db.messages import getMessagesByChatId, createMessage
 import datetime
@@ -129,16 +129,21 @@ def sign_in():
 def sign_up():
     if request.method == "POST":
         email = request.form["email"]
+        username = request.form["username"]
         password = request.form["password"]
         again_password = request.form["again_password"]
         if password != again_password:
             return render_template("signUp.html", error="Passwords are not the same")
-        user_from_db = getUserByEmail(email)
-        if not user_from_db:
-            createUser(email, password)
-            created_user = getUserByEmail(email)
-            session["id"] = created_user["id"]
-            return redirect(url_for('feed'))
+        user_from_db_email = getUserByEmail(email)
+        if not user_from_db_email:
+            user_from_db_name = getUserByUsername(email)
+            if not user_from_db_name:
+                createUser(email, password, username)
+                created_user = getUserByEmail(email)
+                session["id"] = created_user["id"]
+                return redirect(url_for('feed'))
+            else:
+                return render_template("signUp.html", error="There's user with this username")
         else:
             return render_template("signUp.html", error="There's user with this email")
     elif request.method == "GET":
@@ -161,7 +166,8 @@ def profile(client_id):
     return render_template("profile.html", client_id=client_id, client_email=client_email, client_about=client_about)
 
 
-ngrok.set_auth_token("37vEMXYcl0YQCjTmbePQHAJivz3_3VveMBS8a9PDpMZbwsPxA")
-public_url = ngrok.connect(5000)
-print(f" * ngrok tunnel available at: {public_url}")
-app.run(host='0.0.0.0', port=5000)
+if __name__ == "main":
+    ngrok.set_auth_token("37vEMXYcl0YQCjTmbePQHAJivz3_3VveMBS8a9PDpMZbwsPxA")
+    public_url = ngrok.connect(67)
+    print(f" * ngrok tunnel available at: {public_url}")
+    app.run(host='0.0.0.0', port=67)
