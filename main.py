@@ -200,4 +200,4 @@ if __name__ == "__main__":
     # ngrok.set_auth_token("37vEMXYcl0YQCjTmbePQHAJivz3_3VveMBS8a9PDpMZbwsPxA")
     # public_url = ngrok.connect("67")
     # print(f" * ngrok tunnel available at: {public_url}")
-    app.run(host='0.0.0.0', port=67)
+    app.run(host='0.0.0.0', port=67, debug=True)
