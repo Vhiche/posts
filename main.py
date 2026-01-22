@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, send_from_directory, session, redirect, url_for
+from flask_socketio import SocketIO, emit, join_room
 from pyngrok import ngrok
 from functools import wraps
 from db.posts import createPost, getAllPosts, getPostById, deletePostById
@@ -15,6 +16,8 @@ app = Flask(
     static_folder='static',
 
 )
+socketio = SocketIO(app)
+
 
 # session
 app.permanent_session_lifetime = datetime.timedelta(days=7)
@@ -30,6 +33,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route('/uploads/<filename>')
 def get_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
+@socketio.on("join_chat")
+def join_chat(data):
+    join_room(data["chat_id"])
 
 
 def login_required(f):
@@ -90,17 +98,30 @@ def chat_find(client_id):
         return redirect(url_for('chat', chat_id=chat_id))
 
 
-@app.route('/chatlist/<chat_id>', methods=["GET", "POST"])
+@app.route('/chatlist/<chat_id>')
 @login_required
 def chat(chat_id):
-    if request.method == "POST":
-        text = request.form["text"]
-        date_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M")
-        createMessage(text, date_time, int(chat_id), session["id"])
     messages = getMessagesByChatId(int(chat_id))
     for i in range(len(messages)):
         messages[i].update({"sender_email": getUserById(messages[i]["sender_id"])["email"]})
-    return render_template("chat.html", messages=messages)
+    return render_template("chat.html", messages=messages, chat_id=chat_id)
+
+
+@socketio.on("sendMessage")
+@login_required
+def handle_message(data):
+    text = data["text"]
+    chat_id = int(data["chat_id"])
+    sender_id = session["id"]
+    date_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M")
+    createMessage(text, date_time, chat_id, sender_id)
+    user = getUserById(sender_id)
+    emit("new_message", {
+        "text": text,
+        "email": user["email"],
+        "time": date_time,
+        "sender_id": sender_id
+    }, to=str(chat_id))
 
 
 @app.route('/post/delete/<post_id>', methods=["POST"])
@@ -201,6 +222,6 @@ def edit_profile():
 
 if __name__ == "__main__":
     # ngrok.set_auth_token("37vEMXYcl0YQCjTmbePQHAJivz3_3VveMBS8a9PDpMZbwsPxA")
-    # public_url = ngrok.connect("67")
+    # public_url = ngrok.connect("5000")
     # print(f" * ngrok tunnel available at: {public_url}")
-    app.run(host='0.0.0.0', port=67, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

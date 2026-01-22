@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>News</title>
+   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <link href="{{ url_for('static', filename="styles/global.css") }}" rel="stylesheet" type="text/css" />
   <link href="{{ url_for('static', filename="styles/chat.css") }}" rel="stylesheet" type="text/css" />
 </head>
@@ -67,10 +68,8 @@
         {% endfor %}
     </div>
     {% endif %}
-    <form method='POST'>
-      <input type='text' name='text'/>
-      <input type='submit'/>
-    </form>
+    <input type="text" id="text" autocomplete="off">
+    <button onclick="sendMessage()">Send</button>
 
   </div>
 
@@ -78,6 +77,45 @@
       let objDiv = document.getElementById("messages-holder");
       objDiv.scrollTop = objDiv.scrollHeight;
   </script>
+  <script>
+const socket = io();
+const chatId = "{{ chat_id }}";
+const sessionId = {{ session['id'] }};
+
+socket.emit("join_chat", { chat_id: chatId });
+
+socket.on("new_message", function(msg) {
+    let div = document.createElement("div");
+    let messageClass = msg.sender_id === sessionId ? "right" : "left";
+    div.innerHTML = `
+        <div class="message ${messageClass}">
+            <div class="message-header">
+                <span class="message-author">${msg.email}</span>
+                <span class="message-datetime">${msg.time}</span>
+            </div>
+            <div class="message-text">${msg.text}</div>
+        </div>
+    `;
+    document.getElementById("messages-holder").appendChild(div);
+
+    let box = document.getElementById("messages-holder");
+    box.scrollTop = box.scrollHeight;
+});
+
+function sendMessage() {
+    let input = document.getElementById("text");
+    let text = input.value;
+
+    if (text.trim() !== "") {
+        socket.emit("sendMessage", {
+            text: text,
+            chat_id: chatId
+        });
+        input.value = "";
+    }
+}
+</script>
+
   <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
 </body>
 
