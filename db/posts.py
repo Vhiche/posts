@@ -1,4 +1,5 @@
 from db.config import get_connection
+import os
 
 
 def getAllPosts():
@@ -22,15 +23,6 @@ CREATE TABLE IF NOT EXISTS post (
 
 def getPostById(id):
     connection = get_connection()
-    connection.execute("""
-CREATE TABLE IF NOT EXISTS post (
-    id INTEGER PRIMARY KEY,
-    text TEXT NOT NULL,
-    filename TEXT,
-    datetime DATETIME NOT NULL,
-    client_id INTEGER NOT NULL
-)
-    """)
     query = """SELECT * FROM post WHERE id = ?"""
     args = [id]
     cur = connection.execute(query, args)
@@ -42,15 +34,6 @@ CREATE TABLE IF NOT EXISTS post (
 
 def createPost(text, filename, date_time, client_id):
     connection = get_connection()
-    connection.execute("""
-CREATE TABLE IF NOT EXISTS post (
-    id INTEGER PRIMARY KEY,
-    text TEXT NOT NULL,
-    filename TEXT,
-    datetime DATETIME NOT NULL,
-    client_id INTEGER NOT NULL
-)
-    """)
     query = """INSERT INTO post (text, filename, datetime, client_id) VALUES (?, ?, ?, ?)"""
     args = [text, filename, date_time, client_id]
     cur = connection.execute(query, args)
@@ -61,15 +44,12 @@ CREATE TABLE IF NOT EXISTS post (
 
 def deletePostById(id):
     connection = get_connection()
-    connection.execute("""
-CREATE TABLE IF NOT EXISTS post (
-    id INTEGER PRIMARY KEY,
-    text TEXT NOT NULL,
-    filename TEXT,
-    datetime DATETIME NOT NULL,
-    client_id INTEGER NOT NULL
-)
-    """)
+    post = getPostById(id)
+    if post['filename'] != '':
+        try:
+            os.remove(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads', post['filename']))
+        except FileNotFoundError:
+            print("No eyes")
     query = """DELETE FROM post WHERE id = ?"""
     args = [id]
     cur = connection.execute(query, args)

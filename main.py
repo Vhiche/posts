@@ -57,7 +57,10 @@ def feed():
             return render_template("feed.html", posts=posts, form_post_error="Post can't be empty")
         filename = str(uuid.uuid4())
         date_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        if file.filename != '':
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            filename = ''
         createPost(text, filename, date_time, session["id"])
         return redirect(url_for('feed'))
     return render_template("feed.html", posts=posts)
