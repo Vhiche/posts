@@ -37,9 +37,11 @@ def createPost(text, filename, date_time, client_id):
     query = """INSERT INTO post (text, filename, datetime, client_id) VALUES (?, ?, ?, ?)"""
     args = [text, filename, date_time, client_id]
     cur = connection.execute(query, args)
+    post_id = cur.lastrowid
     connection.commit()
     cur.close()
     connection.close()
+    return post_id
 
 
 def deletePostById(id):
@@ -47,7 +49,8 @@ def deletePostById(id):
     post = getPostById(id)
     if post['filename'] != '':
         try:
-            os.remove(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads', post['filename']))
+            file_path = os.path.join(os.path.dirname(__file__), '..', 'uploads', post['filename'])
+            os.remove(file_path)
         except FileNotFoundError:
             print("No eyes")
     query = """DELETE FROM post WHERE id = ?"""

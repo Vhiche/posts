@@ -19,6 +19,9 @@
 .post-img img{
   width: 50%;
 }
+.post-img video{
+  width: 50%;
+}
 .post-footer{
   display: flex;
   justify-content: flex-end;

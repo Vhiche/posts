@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>News</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <link href="{{ url_for('static', filename='styles/global.css') }}" rel="stylesheet" type="text/css" />
   <link href="{{ url_for('static', filename='styles/feed.css') }}" rel="stylesheet" type="text/css" />
 </head>
@@ -62,7 +63,7 @@
                 <div class="post-header">
                   <div class="post-author">
                     <a href="{{url_for('profile', client_id=post.client_id)}}">
-                     {{ post.client_email }}
+                     {{ post.client_username }}
                     </a>
                   </div>
                   <div class="post-date">
@@ -73,9 +74,25 @@
                   <div class="post-text">
                     {{ post.text }}
                   </div>
-                  <div class="post-img">
+                  {% if post.filename %}
+                    {% set file_ext = post.filename.split('.')[-1].lower() %}
+                    {% if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
+                    <div class="post-img">
                       <img src='{{url_for("get_file",filename=post.filename)}}' alt=''>
-                  </div>
+                    </div>
+                    {% elif file_ext in ['mp4', 'webm', 'avi', 'mov', 'mkv', 'flv'] %}
+                    <div class="post-img">
+                      <video controls width="100%">
+                        <source src='{{url_for("get_file",filename=post.filename)}}' type='video/{{ "mp4" if file_ext == "mp4" else "webm" if file_ext == "webm" else file_ext }}'>
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    {% else %}
+                    <div class="post-img">
+                      <a href='{{url_for("get_file",filename=post.filename)}}' download>Download file</a>
+                    </div>
+                    {% endif %}
+                  {% endif %}
                 </div>
                 {% if post.client_id == session['id'] %}
                 <div class="post-footer">
@@ -93,6 +110,71 @@
  
   
   <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+  <script>
+const socket = io();
+const sessionId = {{ session['id'] }};
+
+function getFileExt(filename) {
+    if (!filename) return '';
+    return filename.split('.').pop().toLowerCase();
+}
+
+function renderPost(post) {
+    let postHtml = `
+        <div class="post box">
+            <div class="post-header">
+                <div class="post-author">
+                    <a href="{{url_for('profile', client_id='__client_id__')}}" onclick="this.href=this.href.replace('__client_id__', ${post.client_id})">
+                        ${post.client_email}
+                    </a>
+                </div>
+                <div class="post-date">
+                    ${post.datetime}
+                </div>
+            </div>
+            <div class="post-body">
+                <div class="post-text">
+                    ${post.text}
+                </div>
+    `;
+    
+    if (post.filename) {
+        const ext = getFileExt(post.filename);
+        const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        const videoExts = ['mp4', 'webm', 'avi', 'mov', 'mkv', 'flv'];
+        
+        if (imgExts.includes(ext)) {
+            postHtml += `<div class="post-img"><img src='{{url_for("get_file",filename="__filename__")}}' alt=''></div>`.replace('__filename__', post.filename);
+        } else if (videoExts.includes(ext)) {
+            postHtml += `<div class="post-img"><video controls width="100%"><source src='{{url_for("get_file",filename="__filename__")}}' type='video/${ext}'></video></div>`.replace('__filename__', post.filename);
+        } else {
+            postHtml += `<div class="post-img"><a href='{{url_for("get_file",filename="__filename__")}}' download>Download file</a></div>`.replace('__filename__', post.filename);
+        }
+    }
+    
+    if (post.client_id === sessionId) {
+        postHtml += `
+            <div class="post-footer">
+                <form action="{{url_for('post_delete', post_id='__post_id__')}}" method="post" onsubmit="this.action=this.action.replace('__post_id__', ${post.id})">
+                    <input onclick="return confirm('Are you sure you want to delete this post?')" type="submit" value="Delete">
+                </form>
+            </div>
+        `;
+    }
+    
+    postHtml += `
+            </div>
+        </div>
+    `;
+    
+    return postHtml;
+}
+
+socket.on("new_post", function(post) {
+    let postsContainer = document.getElementById("posts");
+    postsContainer.insertAdjacentHTML('afterbegin', renderPost(post));
+});
+  </script>
 </body>
 
 </html>

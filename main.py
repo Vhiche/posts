@@ -55,7 +55,7 @@ def login_required(f):
 def feed():
     posts = getAllPosts()
     for i in range(len(posts)):
-        posts[i].update({"client_email": getUserById(posts[i]["client_id"])["email"]})
+        posts[i].update({"client_username": getUserById(posts[i]["client_id"])["username"]})
 
     if request.method == "POST":
         text = request.form["text"]
@@ -63,13 +63,22 @@ def feed():
         print(text)
         if len(text) == 0 and file.filename == '':
             return render_template("feed.html", posts=posts, form_post_error="Post can't be empty")
-        filename = str(uuid.uuid4())
+        filename = str(uuid.uuid4()) + '.' + str(file.filename).split('.')[-1]
         date_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
         if file.filename != '':
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         else:
             filename = ''
-        createPost(text, filename, date_time, session["id"])
+        post_id = createPost(text, filename, date_time, session["id"])
+        user = getUserById(session["id"])
+        socketio.emit("new_post", {
+            "id": post_id,
+            "text": text,
+            "filename": filename,
+            "datetime": date_time,
+            "client_id": session["id"],
+            "client_username": user["username"]
+        })
         return redirect(url_for('feed'))
     return render_template("feed.html", posts=posts)
 
@@ -81,9 +90,9 @@ def chat_list():
     chats = getChatsWithClientById(client_id)
     for i in range(len(chats)):
         if chats[i]["first_client_id"] == client_id:
-            chats[i].update({"chat_with": getUserById(chats[i]["second_client_id"])["email"]})
+            chats[i].update({"chat_with": getUserById(chats[i]["second_client_id"])["username"]})
         elif chats[i]["second_client_id"] == client_id:
-            chats[i].update({"chat_with": getUserById(chats[i]["first_client_id"])["email"]})
+            chats[i].update({"chat_with": getUserById(chats[i]["first_client_id"])["username"]})
     return render_template("chatList.html", chats=chats)
 
 
@@ -103,7 +112,7 @@ def chat_find(client_id):
 def chat(chat_id):
     messages = getMessagesByChatId(int(chat_id))
     for i in range(len(messages)):
-        messages[i].update({"sender_email": getUserById(messages[i]["sender_id"])["email"]})
+        messages[i].update({"sender_username": getUserById(messages[i]["sender_id"])["username"]})
     return render_template("chat.html", messages=messages, chat_id=chat_id)
 
 
@@ -131,6 +140,9 @@ def post_delete(post_id):
         post = getPostById(post_id)
         if post["client_id"] == session["id"]:
             deletePostById(post_id)
+            socketio.emit("post_deleted", {
+                "post_id": post_id
+            })
             return redirect(url_for('feed'))
 
 
@@ -221,7 +233,15 @@ def edit_profile():
 
 
 if __name__ == "__main__":
-    # ngrok.set_auth_token("37vEMXYcl0YQCjTmbePQHAJivz3_3VveMBS8a9PDpMZbwsPxA")
-    # public_url = ngrok.connect("5000")
-    # print(f" * ngrok tunnel available at: {public_url}")
+    ngrok.set_auth_token("38dB4HpbLJAgzX10EwAiZg0WjBI_5yUsDvyWS7d4ZQ41U6NzY")
+    try:
+        ngrok.kill()
+    except:
+        pass
+    try:
+        public_url = ngrok.connect("5000")
+        print(f" * ngrok tunnel available at: {public_url}")
+    except Exception as e:
+        print(f"ngrok error: {e}")
+        print("Running without ngrok tunnel")
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

@@ -6,17 +6,17 @@
 }
 a{
   text-decoration: none;
-  color: black;
+  color: white;
 }
 .box{
   padding: 3%;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  box-shadow: rgba(156, 156, 156, 0.8) 0px 2px 8px 0px;
   margin-bottom: 10px;
 }
 
 .navigation{
   padding: 1%;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  box-shadow: rgba(156, 156, 156, 0.8) 0px 2px 8px 0px;
   margin-bottom: 15px;
   display: flex;
   justify-content: space-between;
@@ -27,9 +27,9 @@ a{
 }
 .navigation-item{
   text-decoration: none;
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  box-shadow: rgba(156, 156, 156, 0.8) 0px 2px 8px 0px;
   padding: 10px;
-  color: black;
+  color: white;
   margin-right: 5px;
 }
 
@@ -42,4 +42,9 @@ a{
 .form-error{
   color: red;
   text-align: center;
+}
+
+html{
+  background-color: black;
+  color:white;
 }
